@@ -28,7 +28,12 @@ def train(
         accuracy (float): do chinh xac tren tap danh gia.
     """
 
-    df_train = pd.read_csv(data_path)
+    params = params.copy()
+    extra_train_paths = params.pop("extra_train_paths", []) or []
+
+    train_frames = [pd.read_csv(data_path)]
+    train_frames.extend(pd.read_csv(path) for path in extra_train_paths)
+    df_train = pd.concat(train_frames, ignore_index=True)
     df_eval = pd.read_csv(eval_path)
 
     X_train = df_train.drop(columns=["target"])
@@ -36,13 +41,14 @@ def train(
     X_eval = df_eval.drop(columns=["target"])
     y_eval = df_eval["target"]
 
-    params = params.copy()
     if params.get("max_depth") == "None":
         params["max_depth"] = None
 
     with mlflow.start_run():
 
         mlflow.log_params(params)
+        if extra_train_paths:
+            mlflow.log_param("extra_train_paths", ",".join(extra_train_paths))
 
         model = RandomForestClassifier(**params, random_state=42)
         model.fit(X_train, y_train)
