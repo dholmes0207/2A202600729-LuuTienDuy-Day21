@@ -72,7 +72,7 @@ jobs:
           dvc remote add --force -d myremote "s3://$CLOUD_BUCKET/dvc"
 
       - name: Pull data with DVC
-        run: dvc pull data/train_phase1.csv.dvc data/train_phase2.csv.dvc data/eval.csv.dvc -v
+        run: dvc pull data/train_phase1.csv.dvc data/eval.csv.dvc -v
 
       - name: Train model
         run: python src/train.py
